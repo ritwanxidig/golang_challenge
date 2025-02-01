@@ -131,7 +131,9 @@ func extractFirstNames() []string {
 }
 
 func sendTicket(userName string, email string, userTickets uint) {
+	// PRETENDING THIS TO TAKE SOME TIME LIKE IN REAL WORLD PROCESSING FUNCTIONALITY
 	time.Sleep(10 * time.Second)
+
 	fmt.Println("############### Email Sending ... #####################")
 	var ticket = fmt.Sprintf("%v tickets for %v", userTickets, userName)
 	fmt.Printf("Sending ticket: \n %v \n to email address %v \n", ticket, email)
