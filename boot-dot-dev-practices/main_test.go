@@ -7,38 +7,96 @@ import (
 
 func Test(t *testing.T) {
 	type testCase struct {
-		numDBs int
+		emails   []string
+		expected int
 	}
 	tests := []testCase{
-		{1},
-		{3},
-		{4},
+		{
+			[]string{
+				"To boldly go where no man has gone before.",
+				"Live long and prosper.",
+			},
+			2,
+		},
+		{
+			[]string{
+				"The needs of the many outweigh the needs of the few, or the one.",
+				"Change is the essential process of all existence.",
+				"Resistance is futile.",
+			},
+			3,
+		},
 	}
 	if withSubmit {
 		tests = append(tests, []testCase{
-			{0},
-			{13},
+			{
+				[]string{
+					"It's life, Jim, but not as we know it.",
+					"Infinite diversity in infinite combinations.",
+					"Make it so.",
+					"Engage!",
+				},
+				4,
+			},
 		}...)
 	}
 
+	passCount := 0
+	failCount := 0
+
 	for _, test := range tests {
-		fmt.Printf("---------------------------------\n")
-		fmt.Printf("Testing %v Databases...\n\n", test.numDBs)
-		dbChan, count := getDBsChannel(test.numDBs)
-		waitForDBs(test.numDBs, dbChan)
-		for *count != test.numDBs {
-			fmt.Println("...")
-		}
-		fmt.Printf(`
-expected length: 0, count: %v
-actual length:   %v, count: %v
-PASS
+		ch := addEmailsToQueue(test.emails)
+		actual := len(ch)
+		if actual != test.expected {
+			failCount++
+			t.Errorf(`
 ---------------------------------
+Test Failed:
+  emails:
+%v
+  expected channel length: %v
+  actual channel length:   %v
 `,
-			test.numDBs, len(dbChan), *count)
+				sliceWithBullets(test.emails),
+				test.expected,
+				actual)
+		} else {
+			passCount++
+			fmt.Printf(`
+---------------------------------
+Test Passed:
+  emails:
+%v
+  expected channel length: %v
+  actual channel length:   %v
+`,
+				sliceWithBullets(test.emails),
+				test.expected,
+				actual)
+		}
 	}
+
+	fmt.Println("---------------------------------")
+	fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 }
 
-// withSubmit is set at compile time depending
-// on which button is used to run the tests
+func sliceWithBullets[T any](slice []T) string {
+	if slice == nil {
+		return "  <nil>"
+	}
+	if len(slice) == 0 {
+		return "  []"
+	}
+	output := ""
+	for i, item := range slice {
+		form := "  - %#v\n"
+		if i == (len(slice) - 1) {
+			form = "  - %#v"
+		}
+		output += fmt.Sprintf(form, item)
+	}
+	return output
+}
+
+// withSubmit is set at compile time depending on which button is used to run the tests
 var withSubmit = true
